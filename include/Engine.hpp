@@ -16,15 +16,16 @@ void main() {
 }
 )";
 
-// The Fragment Shader samples our 1D Float array and turns it into grayscale pixels
+// The Fragment Shader now samples our 3D Float array and turns it into RGB pixels
 const char* fragmentShaderSource = R"(
 #version 330 core
 out vec4 FragColor;
 in vec2 TexCoords;
 uniform sampler2D tex;
 void main() {
-    float val = texture(tex, TexCoords).r;
-    FragColor = vec4(val, val, val, 1.0);
+    // Read the RGB vector directly from the texture!
+    vec3 color = texture(tex, TexCoords).rgb;
+    FragColor = vec4(color, 1.0);
 }
 )";
 
@@ -57,7 +58,7 @@ public:
             return false;
         }
 
-        // 3. Compile Shaders (The missing link!)
+        // 3. Compile Shaders
         GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
         glCompileShader(vertexShader);
@@ -116,9 +117,9 @@ public:
         // Tell GPU to use our custom shaders
         glUseProgram(shaderProgram);
         
-        // Blast the 1D Array to the Texture
+        // Blast the 3-Channel Array to the Texture using GL_RGB
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_FLOAT, trailGrid);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, trailGrid);
 
         // Draw the Quad
         glBindVertexArray(VAO);

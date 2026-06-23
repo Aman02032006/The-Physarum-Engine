@@ -1,0 +1,57 @@
+name: Week 4 Architecture & Compilation Check
+
+on:
+  push:
+    branches: [ "week-4-maze", "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Install System Dependencies (OpenGL & GLFW)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libglfw3-dev libgl1-mesa-dev libxi-dev libxcursor-dev libxinerama-dev libxrandr-dev xorg-dev
+
+    - name: Enforce Multi-File Architecture
+      run: |
+        # Strictly verify that mentees modularized their codebase 
+        # according to the Week 4 Notion documentation.
+        
+        if [ ! -f "include/Agent.hpp" ]; then 
+          echo "❌ Agent.hpp is missing from the include/ directory!" 
+          exit 1
+        fi
+        
+        if [ ! -f "include/ImageMapper.hpp" ]; then 
+          echo "❌ ImageMapper.hpp is missing from the include/ directory!" 
+          exit 1
+        fi
+        
+        if [ ! -f "include/stb_image.h" ]; then 
+          echo "❌ stb_image.h C library is missing! Did they download it?" 
+          exit 1
+        fi
+        
+        echo "✅ Multi-file architecture verified."
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Compile Physarum Engine
+      run: cmake --build build --config Release
+      
+    - name: Verify Executable Generation
+      run: |
+        # Ensure the linking phase succeeded and the binary exists
+        if [ ! -f "build/PhysarumEngine" ]; then
+          echo "❌ Compilation failed. Executable not found in build directory."
+          exit 1
+        fi
+        echo "✅ Engine compiled successfully."

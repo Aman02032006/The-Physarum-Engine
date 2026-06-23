@@ -41,8 +41,13 @@ The critical transition from bouncing particles to an artificial organism.
 
 https://github.com/user-attachments/assets/38f69967-57ec-45d5-8c1e-58e7ed7ac32d
 
-### Week 4: [Coming Soon]
-*Currently in development. Planned features include interactive environment boundaries and static food sources to observe network path optimization.*
+### Week 4: Environmental Interaction & Mazes
+This week introduced a major feature: the ability to define the simulation environment using external image files.
+1.  **Image-Based Terrain:** Integrated the `stb_image.h` library to load grayscale images and map them onto the simulation grid. Dark pixels become impassable `OBSTACLE` terrain, while light pixels remain open `AIR`. This allows for the creation of complex mazes and boundaries.
+2.  **Static Food & Home:** Added `FOOD` and `HOME` as distinct `TerrainType` enumerations. Agents now have dedicated logic in their `detectState` and `senseAndSteer` methods to interact with these zones, turning around upon reaching food (to return home) or home (to search for more food).
+3.  **Command-Line Loading:** The engine now accepts a file path as a command-line argument, allowing users to dynamically load different maze configurations at runtime without recompiling.
+
+*   **Result:** The slime mold now intelligently navigates complex environments. When presented with a maze, its emergent web-like structure efficiently finds the shortest path between home and multiple food sources, demonstrating the network optimization behavior seen in real-world *Physarum polycephalum*.
 
 ---
 
