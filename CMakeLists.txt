@@ -19,3 +19,9 @@ target_include_directories(PhysarumEngine PRIVATE
 
 # 4. Link the OpenGL and GLFW system libraries directly to your engine
 target_link_libraries(PhysarumEngine PRIVATE OpenGL::GL glfw)
+
+# Find OpenMP
+find_package(OpenMP REQUIRED)
+
+# Add it to the executible
+target_link_libraries(PhysarumEngine PRIVATE OpenMP::OpenMP_CXX)

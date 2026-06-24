@@ -11,7 +11,7 @@ const int NUM_AGENTS = 10000;
 const float PI = 3.14159;
 const float MAX_SPEED = 5.0f;
 const float DECAY_FACTOR = 0.99f;
-const float REPULSION = -100.0f;
+const float REPULSION = -1000.0f;
 
 float getRandomFloat(float min, float max)
 {
@@ -58,14 +58,14 @@ int main(int argc, char **argv)
     float *writeGrid = new float[WIDTH * HEIGHT * 3](); // Second grid which we write to
     Agent *agents = new Agent[NUM_AGENTS]();            // We can use an array of structs for the agents
 
-    int HomeX = 449;
-    int HomeY = 449;
+    int HomeX = 100;
+    int HomeY = 100;
     int HomeRadius = 15;
 
-    addZone(terrainGrid, 50, 50, 15, FOOD);
-    addZone(terrainGrid, 50, 849, 15, FOOD);
-    addZone(terrainGrid, 849, 50, 15, FOOD);
-    addZone(terrainGrid, 849, 849, 15, FOOD);
+    // addZone(terrainGrid, 100, 100, 15, FOOD);
+    // addZone(terrainGrid, 100, 799, 15, FOOD);
+    // addZone(terrainGrid, 799, 100, 15, FOOD);
+    addZone(terrainGrid, 799, 799, 15, FOOD);
     addZone(terrainGrid, HomeX, HomeY, HomeRadius, HOME);
 
     for (int i = 0; i < NUM_AGENTS; i++)
@@ -79,9 +79,10 @@ int main(int argc, char **argv)
 
     while (!engine.shouldClose())
     {
-        for (int y = 0; y < HEIGHT; y++)
+        #pragma omp parallel for collapse(2)
+        for (int y = 1; y < HEIGHT - 1; y++)
         {
-            for (int x = 0; x < WIDTH; x++)
+            for (int x = 1; x < WIDTH - 1; x++)
             {
 
                 for (int c = 0; c < 3; c++)
@@ -93,11 +94,7 @@ int main(int argc, char **argv)
                         {
                             int X = x + offsetX;
                             int Y = y + offsetY;
-
-                            if (validCoords(X, Y))
-                            {
-                                sum += readGrid[(Y * WIDTH + X) * 3 + c];
-                            }
+                            sum += readGrid[(Y * WIDTH + X) * 3 + c];
                         }
                     }
 
@@ -106,6 +103,22 @@ int main(int argc, char **argv)
                     finalValue = std::min(finalValue, 5.0f);
                     writeGrid[(y * WIDTH + x) * 3 + c] = finalValue;
                 }
+            }
+        }
+
+        #pragma omp parallel for collapse(2)
+        for (int x = 0; x < WIDTH; x++) {
+            for (int c = 0; c < 3; c++) {
+                writeGrid[x * 3 + c] = readGrid[x * 3 + c] * DECAY_FACTOR; 
+                writeGrid[((HEIGHT - 1) * WIDTH + x) * 3 + c] = readGrid[((HEIGHT - 1) * WIDTH + x) * 3 + c] * DECAY_FACTOR; 
+            }
+        }
+
+        #pragma omp parallel for collapse(2)
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int c = 0; c < 3; c++) {
+                writeGrid[(y * WIDTH) * 3 + c] = readGrid[(y * WIDTH) * 3 + c] * DECAY_FACTOR; 
+                writeGrid[(y * WIDTH + WIDTH - 1) * 3 + c] = readGrid[(y * WIDTH + WIDTH - 1) * 3 + c] * DECAY_FACTOR; 
             }
         }
 

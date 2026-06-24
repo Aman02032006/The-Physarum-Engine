@@ -87,18 +87,12 @@ struct Agent
         float FwdSensorValue = getWeight(fwdSensorX, fwdSensorY);
         float RightSensorValue = getWeight(rightSensorX, rightSensorY);
 
+        // if (FwdSensorValue == REPULSION || LeftSensorValue == REPULSION || RightSensorValue == REPULSION)
+        //     currentDeposit = baseDeposit;
+
         // Discrete Steering Logic
         if (FwdSensorValue > LeftSensorValue && FwdSensorValue > RightSensorValue)
             angle += 0.0f;
-        else if (FwdSensorValue == REPULSION || LeftSensorValue == REPULSION || RightSensorValue == REPULSION)
-        {
-            currentDeposit = baseDeposit;
-
-            if (rand() % 2 == 0)
-                angle += turnAngle;
-            else
-                angle -= turnAngle;
-        }
         else if (FwdSensorValue < LeftSensorValue && FwdSensorValue < RightSensorValue)
         {
             if (rand() % 2 == 0)
@@ -122,6 +116,10 @@ struct Agent
         {
             int depositChannel = hasFood ? 1 : 0;
             writeGrid[(gridY * WIDTH + gridX) * 3 + depositChannel] += currentDeposit;
+        }
+        else {
+            if (gridX < 0 || gridX >= WIDTH) angle = PI - angle;
+            if (gridY < 0 || gridY >= HEIGHT) angle = -PI;
         }
     }
 
